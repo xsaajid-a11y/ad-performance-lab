@@ -1,0 +1,6 @@
+{
+  "name": "Meta Ad Creative Variation Optimizer",
+  "description": "Describe past Facebook and Meta ad creative variations and metrics, validate learning requirements (2+ weeks, $75+ spent), and generate high-performing ad scripts and creative elements using Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
