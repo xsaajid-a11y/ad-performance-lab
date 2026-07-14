@@ -48,25 +48,15 @@ export default function ReelsInspirationFinder() {
 
       const data = await response.json();
       
-      // Robustly handle n8n response structure where actual videos are inside data[0].videos or data.videos
+      // Robustly handle different response formats (array vs nested object)
       let list: ReelsInspirationVideo[] = [];
-      if (data) {
-        if (Array.isArray(data)) {
-          if (data.length > 0 && data[0] && Array.isArray(data[0].videos)) {
-            list = data[0].videos;
-          } else if (data.length > 0 && data[0] && Array.isArray(data[0].results)) {
-            list = data[0].results;
-          } else {
-            list = data;
-          }
-        } else if (typeof data === "object") {
-          if (Array.isArray(data.videos)) {
-            list = data.videos;
-          } else if (Array.isArray(data.results)) {
-            list = data.results;
-          } else if (Array.isArray(data.data)) {
-            list = data.data;
-          }
+      if (data && typeof data === "object") {
+        if (Array.isArray(data.videos)) {
+          list = data.videos;
+        } else if (Array.isArray(data)) {
+          list = data;
+        } else {
+          list = data.results || data.data || (data.keyword ? [] : Object.values(data));
         }
       }
 
