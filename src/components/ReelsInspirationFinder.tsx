@@ -109,7 +109,7 @@ export default function ReelsInspirationFinder() {
         share_count: video.share_count
       };
 
-      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
+      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
