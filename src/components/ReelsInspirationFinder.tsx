@@ -88,7 +88,7 @@ export default function ReelsInspirationFinder() {
     if (trainingVideoIds.has(videoId)) return;
 
     // Immediately show brief, elegant success toast message
-    showToast("Training in Process");
+    showToast("Processed successfully! ✅");
 
     // Optimistically add to training list
     setTrainingVideoIds(prev => {
@@ -100,16 +100,16 @@ export default function ReelsInspirationFinder() {
     try {
       const payload = {
         action: "save_and_process",
-        video_id: video.video_id,
-        username: video.username,
-        thumbnail_url: video.thumbnail_url,
-        video_url: video.video_url,
-        play_count: video.play_count,
-        like_count: video.like_count,
-        share_count: video.share_count
+        video_id: video.video_id || "",
+        username: video.username || "",
+        thumbnail_url: video.thumbnail_url || "",
+        video_url: video.video_url || "",
+        play_count: typeof video.play_count === 'number' ? video.play_count : (Number(video.play_count) || 0),
+        like_count: typeof video.like_count === 'number' ? video.like_count : (Number(video.like_count) || 0),
+        share_count: typeof video.share_count === 'number' ? video.share_count : (Number(video.share_count) || 0)
       };
 
-      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
+      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -359,16 +359,17 @@ export default function ReelsInspirationFinder() {
                           <div>
                             <button
                               onClick={() => handleTrainAI(video)}
-                              className={`w-full py-2.5 px-4 font-bold rounded-xl text-[11px] font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                              disabled={isTraining}
+                              className={`w-full py-2.5 px-4 font-bold rounded-xl text-[11px] font-mono uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-1.5 ${
                                 isTraining 
-                                  ? "bg-zinc-800 text-zinc-500 border border-zinc-700/50 cursor-not-allowed" 
-                                  : "bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-900/20 hover:shadow-blue-900/30"
+                                  ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/40 cursor-not-allowed" 
+                                  : "bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-900/20 hover:shadow-blue-900/30 cursor-pointer"
                               }`}
                             >
                               {isTraining ? (
                                 <>
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-zinc-500" />
-                                  <span>Training Initiated</span>
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span>Submitted for Training Already ✅</span>
                                 </>
                               ) : (
                                 <>
@@ -401,13 +402,12 @@ export default function ReelsInspirationFinder() {
 
       {/* FLOATABLE SUCCESS TOAST NOTIFICATION */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-blue-600 text-white px-5 py-3.5 rounded-2xl shadow-3xl border border-blue-500 flex items-center gap-3 animate-fade-in-up">
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-3xl border border-emerald-500 flex items-center gap-3 animate-fade-in-up">
           <div className="p-1 bg-white/20 rounded-lg">
             <CheckCircle2 className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-xs font-bold font-mono tracking-wide uppercase">Training in Process</p>
-            <p className="text-[10px] text-blue-100 mt-0.5">n8n is parsing performance signals...</p>
+            <p className="text-xs font-bold font-mono tracking-wide">{toastMessage}</p>
           </div>
         </div>
       )}
