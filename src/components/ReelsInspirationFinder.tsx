@@ -368,7 +368,7 @@ export default function ReelsInspirationFinder() {
                               {isTraining ? (
                                 <>
                                   <CheckCircle2 className="w-3.5 h-3.5 text-zinc-500" />
-                                  <span>Training Initiated</span>
+                                  <span>Submitted for Training</span>
                                 </>
                               ) : (
                                 <>
