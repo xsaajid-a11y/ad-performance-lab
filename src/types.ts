@@ -63,6 +63,7 @@ export interface ReelsInspirationVideo {
   video_id?: string;
   user?: string;
   username?: string;
+  full_name?: string;
   thumbnail_url?: string;
   video_url?: string;
   ig_play_count?: number;
@@ -70,5 +71,9 @@ export interface ReelsInspirationVideo {
   like_count?: number;
   comment_count?: number;
   share_count?: number;
+  formatted_views?: string;
+  formatted_likes?: string;
+  formatted_comments?: string;
+  formatted_shares?: string;
 }
 
