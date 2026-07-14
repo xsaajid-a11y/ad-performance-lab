@@ -49,7 +49,7 @@ const SAMPLE_VIRAL_INSPIRATIONS: ViralInspiration[] = [
     niche: "B2B SaaS (AI Smart Calendar)",
     title: "Chaotic Slack DM Montage",
     hook: "This slack DM literally saved me from a mental breakdown...",
-    body: "My boss sent me 14 scheduling links in 1 hour. I sent him one ChronosAI block that auto-clustered all meetings and defended my 3-hour focus window. He didn't even know what hit him.",
+    body: "My boss sent me 14 scheduling links an hour. I sent him one ChronosAI block that auto-clustered all meetings and defended my 3-hour focus window. He didn't even know what hit him.",
     cta: "Try Free",
     description: "Green-screen zoom of chaotic Slack messages overlay, matching high-stress sound effect, transitioning to creator smiling holding an iced coffee.",
     views: "1.2M views",
