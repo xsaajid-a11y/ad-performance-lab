@@ -50,10 +50,14 @@ export default function ReelsInspirationFinder() {
       
       // Robustly handle different response formats (array vs nested object)
       let list: ReelsInspirationVideo[] = [];
-      if (Array.isArray(data)) {
-        list = data;
-      } else if (data && typeof data === "object") {
-        list = data.results || data.data || data.videos || (data.keyword ? [] : Object.values(data));
+      if (data && typeof data === "object") {
+        if (Array.isArray(data.videos)) {
+          list = data.videos;
+        } else if (Array.isArray(data)) {
+          list = data;
+        } else {
+          list = data.results || data.data || (data.keyword ? [] : Object.values(data));
+        }
       }
 
       setVideos(list || []);
@@ -86,13 +90,13 @@ export default function ReelsInspirationFinder() {
     try {
       const payload = {
         action: "save_and_process",
-        video_id: videoId,
-        username: video.username || video.user || "anonymous_creator",
-        thumbnail_url: video.thumbnail_url || "",
-        video_url: video.video_url || "",
-        play_count: video.ig_play_count || video.play_count || 0,
-        like_count: video.like_count || 0,
-        share_count: video.share_count || 0
+        video_id: video.video_id,
+        username: video.username,
+        thumbnail_url: video.thumbnail_url,
+        video_url: video.video_url,
+        play_count: video.play_count,
+        like_count: video.like_count,
+        share_count: video.share_count
       };
 
       const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
@@ -230,7 +234,7 @@ export default function ReelsInspirationFinder() {
                   <p className="text-xs text-zinc-500">Try searching for other performance categories or broaden your keyword.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {videos.map((video, idx) => {
                     const videoId = video.video_id || video.id || `video_${idx}`;
                     const username = video.username || video.user || "anonymous";
@@ -239,90 +243,110 @@ export default function ReelsInspirationFinder() {
                     return (
                       <div 
                         key={videoId}
-                        className="bg-zinc-900/40 border border-zinc-900 rounded-2xl overflow-hidden flex flex-col justify-between group hover:border-blue-500/20 transition-all duration-200"
+                        className="bg-zinc-900/30 border border-zinc-900 rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:border-blue-500/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-950/10"
                       >
-                        {/* Interactive Thumbnail */}
-                        <div className="relative aspect-video w-full bg-zinc-950 overflow-hidden">
+                        {/* Left: Clickable Thumbnail Image wrapper */}
+                        <div className="relative w-full sm:w-44 aspect-video sm:aspect-square flex-shrink-0 bg-zinc-950 overflow-hidden">
                           {video.thumbnail_url ? (
-                            <img 
-                              src={video.thumbnail_url} 
-                              alt={`Thumbnail by ${username}`}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              referrerPolicy="no-referrer"
-                              onError={(e) => {
-                                // Fallback if image fails to load
-                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&auto=format&fit=crop&q=60";
-                              }}
-                            />
+                            <a 
+                              href={video.video_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block w-full h-full relative group/thumb cursor-pointer"
+                            >
+                              <img 
+                                src={video.thumbnail_url} 
+                                alt={video.full_name || username}
+                                className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                  // Fallback if image fails to load
+                                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&auto=format&fit=crop&q=60";
+                                }}
+                              />
+                              {/* Hover overlay indicator */}
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition-opacity duration-200">
+                                <div className="p-3 rounded-full bg-blue-600 text-white shadow-xl flex items-center justify-center transform scale-90 group-hover/thumb:scale-100 transition-transform duration-200">
+                                  <Play className="w-5 h-5 fill-current ml-0.5" />
+                                </div>
+                              </div>
+                            </a>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-zinc-950">
                               <Tv className="w-8 h-8 text-zinc-800" />
                             </div>
                           )}
-                          
-                          {/* Play Overlay */}
-                          {video.video_url && (
-                            <a 
-                              href={video.video_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200"
-                            >
-                              <div className="p-3 rounded-full bg-blue-600 text-white shadow-xl flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-200">
-                                <Play className="w-5 h-5 fill-current ml-0.5" />
-                              </div>
-                            </a>
-                          )}
                         </div>
 
-                        {/* Content Area */}
-                        <div className="p-4 space-y-4 flex-grow flex flex-col justify-between">
-                          <div>
-                            {/* Creator Username */}
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-zinc-100 font-mono tracking-tight hover:text-blue-400 transition-colors">
-                                @{username}
-                              </span>
-                              {video.video_url && (
-                                <a 
-                                  href={video.video_url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-zinc-500 hover:text-zinc-300"
-                                >
-                                  <ExternalLink className="w-3.5 h-3.5" />
-                                </a>
-                              )}
+                        {/* Right: Details Content Section */}
+                        <div className="p-5 flex-grow flex flex-col justify-between gap-4">
+                          <div className="space-y-4">
+                            {/* Creator Name and Username section */}
+                            <div className="space-y-1">
+                              <div className="flex items-start justify-between">
+                                <div className="space-y-0.5">
+                                  <h4 className="text-base sm:text-lg font-bold text-zinc-100 font-display tracking-tight leading-snug">
+                                    {video.full_name || "Content Creator"}
+                                  </h4>
+                                  <p className="text-xs font-semibold text-blue-400 font-mono">
+                                    @{username}
+                                  </p>
+                                </div>
+                                {video.video_url && (
+                                  <a 
+                                    href={video.video_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-zinc-500 hover:text-zinc-300 p-1 rounded-lg hover:bg-zinc-800/50 transition-colors"
+                                  >
+                                    <ExternalLink className="w-4 h-4" />
+                                  </a>
+                                )}
+                              </div>
                             </div>
 
                             {/* Performance Stats Row */}
-                            <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-zinc-900/80">
-                              <div className="flex flex-col items-center justify-center bg-zinc-950/40 py-2 rounded-xl border border-zinc-900/30">
-                                <Play className="w-3.5 h-3.5 text-blue-400 mb-1" />
-                                <span className="text-[10px] font-mono text-zinc-100 font-bold">
-                                  {formatCount(video.ig_play_count || video.play_count)}
+                            <div className="grid grid-cols-4 gap-2 pt-3.5 border-t border-zinc-900/60">
+                              {/* Standout Views stat box */}
+                              <div className="flex flex-col items-center justify-center bg-blue-950/20 border border-blue-900/30 rounded-xl py-2 px-1">
+                                <Play className="w-4 h-4 text-blue-400 mb-1" />
+                                <span className="text-sm sm:text-base font-extrabold text-blue-400 font-mono leading-none">
+                                  {video.formatted_views || "0"}
                                 </span>
-                                <span className="text-[8px] font-mono text-zinc-500 uppercase">Plays</span>
+                                <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-wider mt-1">Views</span>
                               </div>
-                              <div className="flex flex-col items-center justify-center bg-zinc-950/40 py-2 rounded-xl border border-zinc-900/30">
-                                <Heart className="w-3.5 h-3.5 text-rose-400 mb-1" />
-                                <span className="text-[10px] font-mono text-zinc-100 font-bold">
-                                  {formatCount(video.like_count)}
+
+                              {/* Standard Likes stat box */}
+                              <div className="flex flex-col items-center justify-center bg-zinc-950/40 border border-zinc-900/30 rounded-xl py-2 px-1">
+                                <Heart className="w-3.5 h-3.5 text-rose-500 mb-1" />
+                                <span className="text-xs font-bold text-zinc-200 font-mono leading-none">
+                                  {video.formatted_likes || "0"}
                                 </span>
-                                <span className="text-[8px] font-mono text-zinc-500 uppercase">Likes</span>
+                                <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-wider mt-1">Likes</span>
                               </div>
-                              <div className="flex flex-col items-center justify-center bg-zinc-950/40 py-2 rounded-xl border border-zinc-900/30">
-                                <Share2 className="w-3.5 h-3.5 text-emerald-400 mb-1" />
-                                <span className="text-[10px] font-mono text-zinc-100 font-bold">
-                                  {formatCount(video.share_count)}
+
+                              {/* Standard Comments stat box */}
+                              <div className="flex flex-col items-center justify-center bg-zinc-950/40 border border-zinc-900/30 rounded-xl py-2 px-1">
+                                <MessageSquare className="w-3.5 h-3.5 text-zinc-400 mb-1" />
+                                <span className="text-xs font-bold text-zinc-200 font-mono leading-none">
+                                  {video.formatted_comments || "0"}
                                 </span>
-                                <span className="text-[8px] font-mono text-zinc-500 uppercase">Shares</span>
+                                <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-wider mt-1">Comments</span>
+                              </div>
+
+                              {/* Standard Shares stat box */}
+                              <div className="flex flex-col items-center justify-center bg-zinc-950/40 border border-zinc-900/30 rounded-xl py-2 px-1">
+                                <Share2 className="w-3.5 h-3.5 text-emerald-500 mb-1" />
+                                <span className="text-xs font-bold text-zinc-200 font-mono leading-none">
+                                  {video.formatted_shares || "0"}
+                                </span>
+                                <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-wider mt-1">Shares</span>
                               </div>
                             </div>
                           </div>
 
-                          {/* Training Action Button */}
-                          <div className="pt-3">
+                          {/* Action Button */}
+                          <div>
                             <button
                               onClick={() => handleTrainAI(video)}
                               className={`w-full py-2.5 px-4 font-bold rounded-xl text-[11px] font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
