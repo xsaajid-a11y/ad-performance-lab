@@ -34,7 +34,7 @@ export default function ReelsInspirationFinder() {
 
     try {
       // POST the raw keyword JSON string as requested: "the word the user typed"
-      const response = await fetch("https://group.app.n8n.cloud/webhook/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
+      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
