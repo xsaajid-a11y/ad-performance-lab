@@ -7,6 +7,7 @@ import AICreativeRecommendations from "./components/AICreativeRecommendations";
 import SavedScripts from "./components/SavedScripts";
 import AddVariationModal from "./components/AddVariationModal";
 import CtrTrendsChart from "./components/CtrTrendsChart";
+import ReelsInspirationFinder from "./components/ReelsInspirationFinder";
 import { 
   Sparkles, 
   Layers, 
@@ -78,6 +79,16 @@ const SAMPLE_VIRAL_INSPIRATIONS: ViralInspiration[] = [
   }
 ];
 
+function safeJsonParse<T>(value: string | null, fallback: T): T {
+  if (!value || value === "undefined") return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch (e) {
+    console.warn("JSON parsing error", e);
+    return fallback;
+  }
+}
+
 export default function App() {
   // 1. STATE INITIALIZATION
   const [selectedNicheId, setSelectedNicheId] = useState<string>(NICHE_TEMPLATES[0].id);
@@ -85,9 +96,7 @@ export default function App() {
   // Mutable drafts / reference examples (User can delete these if needed)
   const [variations, setVariations] = useState<AdVariation[]>(() => {
     const saved = localStorage.getItem("advantage_variations");
-    if (saved) return JSON.parse(saved);
-    // Default: seed all template variations
-    return NICHE_TEMPLATES.flatMap(t => t.preloadedVariations);
+    return safeJsonParse(saved, NICHE_TEMPLATES.flatMap(t => t.preloadedVariations));
   });
 
   // Supabase Database States
@@ -112,26 +121,20 @@ export default function App() {
         setDbMessage("Table 'ad_variations' does not exist in your Supabase database yet.");
         // Fallback to local
         const saved = localStorage.getItem("advantage_logged_database");
-        if (saved) {
-          setLoggedDatabase(JSON.parse(saved));
-        }
+        setLoggedDatabase(safeJsonParse(saved, []));
       } else {
         setDbStatus("unconfigured");
         setDbMessage("Supabase credentials not configured. Local fallback enabled.");
         // Fallback to local
         const saved = localStorage.getItem("advantage_logged_database");
-        if (saved) {
-          setLoggedDatabase(JSON.parse(saved));
-        }
+        setLoggedDatabase(safeJsonParse(saved, []));
       }
     } catch (err: any) {
       console.error("Failed to load Supabase variations:", err);
       setDbStatus("error");
       setDbMessage("Could not connect to database proxy server.");
       const saved = localStorage.getItem("advantage_logged_database");
-      if (saved) {
-        setLoggedDatabase(JSON.parse(saved));
-      }
+      setLoggedDatabase(safeJsonParse(saved, []));
     }
   };
 
@@ -142,17 +145,16 @@ export default function App() {
   // Viral inspirations state
   const [viralInspirations, setViralInspirations] = useState<ViralInspiration[]>(() => {
     const saved = localStorage.getItem("advantage_viral_inspirations");
-    if (saved) return JSON.parse(saved);
-    return SAMPLE_VIRAL_INSPIRATIONS;
+    return safeJsonParse(saved, SAMPLE_VIRAL_INSPIRATIONS);
   });
 
   const [savedScripts, setSavedScripts] = useState<RecommendedAd[]>(() => {
     const saved = localStorage.getItem("advantage_saved_scripts");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse(saved, []);
   });
 
   const [notes, setNotes] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "ai" | "saved">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "ai" | "saved" | "inspiration">("dashboard");
   const [optimizationResults, setOptimizationResults] = useState<{ [nicheId: string]: OptimizationResult }>({});
 
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -191,9 +193,7 @@ export default function App() {
 
   useEffect(() => {
     const savedResults = localStorage.getItem("advantage_optimization_results");
-    if (savedResults) {
-      setOptimizationResults(JSON.parse(savedResults));
-    }
+    setOptimizationResults(safeJsonParse(savedResults, {}));
   }, []);
 
   // 2. COMPUTED STATES
@@ -468,6 +468,19 @@ export default function App() {
             }`}
           >
             <Bookmark className="w-3.5 h-3.5" /> Bookmarks ({savedScripts.length})
+          </button>
+          <button 
+            onClick={() => {
+              setActiveTab("inspiration");
+              setErrorMsg(null);
+            }}
+            className={`px-5 py-2 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "inspiration" 
+                ? "bg-amber-400 text-black font-semibold" 
+                : "text-zinc-400 hover:text-zinc-100"
+            }`}
+          >
+            <Tv className="w-3.5 h-3.5" /> Inspiration Finder
           </button>
         </div>
       </header>
@@ -840,15 +853,27 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
                   </div>
 
                   {activeViralInspirations.length === 0 ? (
-                    <div className="bg-zinc-950 border border-zinc-900 border-dashed rounded-2xl p-10 text-center text-zinc-500 text-xs space-y-2.5">
+                    <div className="bg-zinc-950 border border-zinc-900 border-dashed rounded-2xl p-10 text-center text-zinc-500 text-xs space-y-3">
                       <Tv className="w-8 h-8 text-zinc-600 mx-auto" />
                       <p>No competitor viral reels described yet for this niche.</p>
-                      <button 
-                        onClick={() => setShowInspirationModal(true)}
-                        className="text-xs text-amber-400 underline font-mono cursor-pointer"
-                      >
-                        + Describe Viral Reference
-                      </button>
+                      <div className="flex flex-col items-center gap-2 pt-1">
+                        <button 
+                          onClick={() => setShowInspirationModal(true)}
+                          className="text-xs text-amber-400 underline font-mono cursor-pointer"
+                        >
+                          + Describe Manual Reference
+                        </button>
+                        <span className="text-[10px] text-zinc-600 font-mono">or</span>
+                        <button 
+                          onClick={() => {
+                            setActiveTab("inspiration");
+                            setErrorMsg(null);
+                          }}
+                          className="text-[10px] bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-lg font-mono cursor-pointer transition-all flex items-center gap-1 shadow-lg shadow-blue-900/10"
+                        >
+                          🔍 Use Live Inspiration Finder
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-6">
@@ -1146,6 +1171,13 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
                 onDeleteScript={handleDeleteSavedScript}
                 onClearAll={handleClearAllSaved}
               />
+            </div>
+          )}
+
+          {/* TAB 4: REELS & TIKTOK INSPIRATION FINDER */}
+          {activeTab === "inspiration" && (
+            <div id="reels-inspiration-workspace" className="animate-fade-in">
+              <ReelsInspirationFinder />
             </div>
           )}
 
