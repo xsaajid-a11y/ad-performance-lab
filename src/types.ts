@@ -57,3 +57,18 @@ export interface NicheTemplate {
   description: string;
   preloadedVariations: AdVariation[];
 }
+
+export interface ReelsInspirationVideo {
+  id?: string;
+  video_id?: string;
+  user?: string;
+  username?: string;
+  thumbnail_url?: string;
+  video_url?: string;
+  ig_play_count?: number;
+  play_count?: number;
+  like_count?: number;
+  comment_count?: number;
+  share_count?: number;
+}
+
