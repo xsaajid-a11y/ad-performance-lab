@@ -32,7 +32,7 @@ import {
   HelpCircle
 } from "lucide-react";
 
-// Pre-populated Sample Viral Inspirations to give a beautiful immediate experience
+// Pre-populated Sample Viral Inspirations to give a beautiful immediate experienc
 const SAMPLE_VIRAL_INSPIRATIONS: ViralInspiration[] = [
   {
     id: "viral_skin_1",
