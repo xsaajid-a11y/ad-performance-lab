@@ -68,11 +68,14 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
         email: data.user_email || `user_${data.id.substring(0, 5)}@creativeslab.ai`
       };
 
-      const licenseObj: LicenseKeyRow = {
+const licenseObj: LicenseKeyRow = {
         id: data.id,
         key: data.license_key,
         is_active: !!data.is_active
       };
+
+      // Save it here so the entire app can access it instantly!
+      localStorage.setItem("workspace_license_key", data.license_key);
 
       onVerified(userObj, licenseObj);
     } catch (err: any) {
