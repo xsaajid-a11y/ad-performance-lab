@@ -18,7 +18,7 @@ import { ReelsInspirationVideo } from "../types";
 interface ReelsInspirationFinderProps {
   licenseKey: string;
 }
-export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationFinderProps) {{
+export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationFinderProps) {
   const [keyword, setKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -36,15 +36,14 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
     setErrorMsg(null);
 
     try {
-          // Keep the body as a pure, raw string text so your n8n body node stays happy
-          const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-License-Key": licenseKey // Passes the license key as a separate variable here!
-            },
-            body: JSON.stringify(keyword.trim())
-          });
+      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-License-Key": licenseKey
+        },
+        body: JSON.stringify(keyword.trim())
+      });
 
       if (!response.ok) {
         throw new Error(`Server responded with ${response.status}`);
@@ -84,7 +83,7 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
     }
   };
 
-  // Trigger n8n Action Logic Webhook
+ // Trigger n8n Action Logic Webhook
   const handleTrainAI = async (video: ReelsInspirationVideo) => {
     const videoId = video.video_id || video.id || "unknown_id";
     
@@ -114,28 +113,15 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
         share_count: video.share_count
       };
 
-try {
-      const payload = {
-        action: "save_and_process",
-        license_key: licenseKey,
-        video_id: video.video_id,
-        username: video.username,
-        thumbnail_url: video.thumbnail_url,
-        video_url: video.video_url,
-        play_count: video.play_count,
-        like_count: video.like_count,
-        share_count: video.share_count
-      };
-          // Keep the body as a pure, raw string text so your n8n body node stays happy
-          const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9"), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-License-Key": licenseKey // Passes the license key as a separate variable here!
-            },
-            body: JSON.stringify(keyword.trim())
-          });
-    
+    const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-License-Key": licenseKey // Added here as a separate header variable!
+        },
+        body: JSON.stringify(payload)
+      });
+
       if (!response.ok) {
         throw new Error("Failed to post training action");
       }
