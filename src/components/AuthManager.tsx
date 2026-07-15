@@ -37,11 +37,13 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
 
     try {
       // 1. We query your newly updated 'license_key' column in Supabase
-      const keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?license_key=eq.${encodeURIComponent(licenseKeyInput)}`;
+    const keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?license_key=eq.${encodeURIComponent(licenseKeyInput)}`;
       const keyRes = await fetch(keyUrl, {
         headers: {
           "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Profile": "public",
+          "Accept": "application/json"
         }
       });
 
