@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { NICHE_TEMPLATES } from "./data";
+import { AuthManager } from "./components/AuthManager";
 import { AdVariation, OptimizationResult, RecommendedAd, ViralInspiration } from "./types";
-import { AuthManager } from "./AuthManager"; // Double-check the path matches your filename
 import DashboardStats from "./components/DashboardStats";
 import AdVariationCard from "./components/AdVariationCard";
 import AICreativeRecommendations from "./components/AICreativeRecommendations";
@@ -89,12 +89,22 @@ function safeJsonParse<T>(value: string | null, fallback: T): T {
     return fallback;
   }
 }
+
 export default function App() {
-  // 1. STATE INITIALIZATION
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(() => {
-    return !!localStorage.getItem("workspace_license_key");
+  // 0. AUTHENTICATION GATING STATE
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem("cl_authenticated") === "true";
+  });
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    const saved = localStorage.getItem("cl_user_obj");
+    return saved ? safeJsonParse(saved, null) : null;
+  });
+  const [licenseInfo, setLicenseInfo] = useState<any>(() => {
+    const saved = localStorage.getItem("cl_license_obj");
+    return saved ? safeJsonParse(saved, null) : null;
   });
 
+  // 1. STATE INITIALIZATION
   const [selectedNicheId, setSelectedNicheId] = useState<string>(NICHE_TEMPLATES[0].id);
   
   // Mutable drafts / reference examples (User can delete these if needed)
@@ -102,6 +112,7 @@ export default function App() {
     const saved = localStorage.getItem("advantage_variations");
     return safeJsonParse(saved, NICHE_TEMPLATES.flatMap(t => t.preloadedVariations));
   });
+
   // Supabase Database States
   const [loggedDatabase, setLoggedDatabase] = useState<AdVariation[]>([]);
   const [dbStatus, setDbStatus] = useState<"loading" | "connected" | "unconfigured" | "table_missing" | "error">("loading");
@@ -218,21 +229,8 @@ export default function App() {
   const activeViralInspirations = viralInspirations.filter(ins => ins.niche === activeNicheTemplate.name);
 
   const activeNicheResult = optimizationResults[selectedNicheId] || null;
-  const [activeStep, setActiveStep] = useState<number>(3);
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  const memoizedResults = useMemo(() => {
-    if (!activeNicheResult) return [];
-    return Object.values(activeNicheResult).filter(Boolean);
-  }, [activeNicheResult]);
-
-  const handleStepChange = (step: number) => {
-    setActiveStep(step);
-  };
-
-  const handleProcessToggle = () => {
-    setIsProcessing((prev) => !prev);
-  };
+  // 3. HANDLERS
   const handleDeleteVariation = (id: string) => {
     setVariations((prev) => prev.filter(v => v.id !== id));
   };
@@ -433,25 +431,40 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isGenerating]);
 
+  if (!isAuthenticated) {
+    return (
+      <AuthManager 
+        onVerified={(user, license) => {
+          setIsAuthenticated(true);
+          setCurrentUser(user);
+          setLicenseInfo(license);
+          localStorage.setItem("cl_authenticated", "true");
+          localStorage.setItem("cl_user_obj", JSON.stringify(user));
+          localStorage.setItem("cl_license_obj", JSON.stringify(license));
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-zinc-100 flex flex-col font-sans">
       
       {/* 1. MINIMALIST TOP NAV BAR */}
-      <header id="app-header" className="border-b border-zinc-900 bg-black/90 backdrop-blur-md px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-6 sticky top-0 z-40">
+      <header id="app-header" className="border-b border-zinc-900 bg-black/90 backdrop-blur-md px-8 py-5 flex flex-col xl:flex-row justify-between items-center gap-6 sticky top-0 z-40">
         <div className="flex items-center space-x-3.5">
           <div className="w-10 h-10 rounded-xl bg-amber-950/20 border border-amber-900/40 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-amber-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold font-display text-zinc-100 tracking-tight">AdVantage AI</h1>
+              <h1 className="text-xl font-bold font-display text-zinc-100 tracking-tight">Creatives Lab</h1>
               <span className="text-[9px] font-mono bg-amber-950/30 text-amber-400 border border-amber-900/40 px-2.5 py-0.5 rounded-full font-bold">META PERFORMANCE LAB</span>
             </div>
           </div>
         </div>
 
         {/* Global Tab Navigation */}
-        <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+        <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex-wrap justify-center gap-1">
           <button 
             onClick={() => setActiveTab("dashboard")}
             className={`px-5 py-2 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-2 cursor-pointer ${
@@ -498,6 +511,31 @@ export default function App() {
           >
             <Tv className="w-3.5 h-3.5" /> Inspiration Finder
           </button>
+        </div>
+
+        {/* User profile & License status */}
+        <div className="flex items-center gap-3">
+          {licenseInfo && (
+            <div className="flex items-center gap-3 bg-zinc-950 border border-zinc-900 rounded-xl px-3 py-1.5 text-xs">
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] text-zinc-300 font-mono font-semibold">Active License</span>
+                <span className="text-[8px] text-emerald-400 font-mono font-bold tracking-wider uppercase mt-0.5">Verified Workspace</span>
+              </div>
+              <button
+                onClick={() => {
+                  setIsAuthenticated(false);
+                  setCurrentUser(null);
+                  setLicenseInfo(null);
+                  localStorage.removeItem("cl_authenticated");
+                  localStorage.removeItem("cl_user_obj");
+                  localStorage.removeItem("cl_license_obj");
+                }}
+                className="text-[9px] font-mono font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-800 cursor-pointer transition-all"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -1093,6 +1131,89 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
                 )}
               </div>
 
+            </div>
+          )}
+
+          {/* TAB 2: AI OPTIMIZER WORKSPACE */}
+          {activeTab === "ai" && (
+            <div id="ai-chamber-workspace" className="space-y-8">
+              
+              {/* Loading Tech Terminal */}
+              {isGenerating && (
+                <div id="terminal-loader" className="bg-zinc-950 border border-zinc-900 rounded-3xl p-10 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[400px]">
+                  
+                  <div className="relative mb-6">
+                    <div className="w-14 h-14 rounded-full border-4 border-amber-400/10 border-t-amber-400 animate-spin flex items-center justify-center" />
+                    <Sparkles className="w-5 h-5 text-amber-400 absolute inset-0 m-auto animate-pulse" />
+                  </div>
+
+                  <h3 className="text-base font-bold font-display text-zinc-100 mb-2">Analyzing Meta Performance Curves</h3>
+                  <p className="text-xs text-zinc-400 max-w-md mx-auto mb-6 leading-relaxed">
+                    Gemini is processing your combined {combinedNicheVariations.length} reference and logged database variations, along with {activeViralInspirations.length} competitor references.
+                  </p>
+
+                  {/* Tech terminal line logs */}
+                  <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl max-w-lg w-full text-left font-mono text-[11px] text-zinc-400 space-y-2.5 shadow-inner">
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400">❯</span>
+                      <span>DB_INIT: linked performance_vault count = {activeDatabaseVariations.length}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400">❯</span>
+                      <span>COMPETITOR_VAULT: viral_inspirations count = {activeViralInspirations.length}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-amber-400 font-semibold">
+                      <span className="text-amber-400 animate-pulse">●</span>
+                      <span>{loadingSteps[generationStep]}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Error boundary display */}
+              {errorMsg && !isGenerating && (
+                <div id="error-alert" className="bg-red-950/20 border border-red-900/40 text-red-200 p-6 rounded-2xl space-y-3 shadow-2xl">
+                  <h3 className="text-base font-bold font-display">Generation Interrupted</h3>
+                  <p className="text-xs leading-relaxed">{errorMsg}</p>
+                  <button 
+                    onClick={handleOptimize}
+                    className="text-xs font-mono font-bold text-red-200 bg-red-900/30 border border-red-800 px-4 py-2 rounded-lg hover:bg-red-900 transition-all cursor-pointer"
+                  >
+                    Retry Creative Synthesis
+                  </button>
+                </div>
+              )}
+
+              {/* No analysis empty state */}
+              {!activeNicheResult && !isGenerating && !errorMsg && (
+                <div id="ai-chamber-empty" className="bg-zinc-950 border border-zinc-900 rounded-3xl p-12 text-center max-w-xl mx-auto my-8 space-y-6 shadow-2xl">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-950/20 border border-amber-900/40 text-amber-400 flex items-center justify-center mx-auto">
+                    <Sparkles className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div className="space-y-2 max-w-md mx-auto">
+                    <h3 className="text-lg font-bold font-display text-zinc-100">AI Creative Chamber Ready</h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      We will analyze your {combinedNicheVariations.length} total variations (reference examples and locked database entries) and {activeViralInspirations.length} competitor reels to engineer high-CTR ad concepts.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOptimize}
+                    className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-mono hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+                  >
+                    Run Strategic Optimization
+                  </button>
+                </div>
+              )}
+
+              {/* AI Recommendations Output */}
+              {activeNicheResult && !isGenerating && !errorMsg && (
+                <AICreativeRecommendations 
+                  data={activeNicheResult}
+                  onSaveScript={handleSaveScript}
+                  savedScripts={savedScripts}
+                  nicheName={activeNicheTemplate.name}
+                />
+              )}
             </div>
           )}
 
