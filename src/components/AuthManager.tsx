@@ -39,9 +39,7 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
     setLoading(true);
     setError(null);
 
- try {
-      const trimmedKey = licenseKeyInput.trim();
-      
+    try {
       const { data, error: queryError } = await supabase
         .from("license_keys")
         .select("*")
@@ -50,14 +48,19 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
 
       if (queryError) {
         console.error("Database query error:", queryError);
-        setError(`Database connection error: ${queryError.message}`);
+        setError("Invalid license key. Please verify your key and try again.");
         setLoading(false);
         return;
       }
 
-      // Diagnostic check: This will tell us EXACTLY what the database found
       if (!data) {
-        setError(`Database connected, but found nothing. Looked for key: "${trimmedKey}"`);
+        setError("Invalid license key. Please verify your key and try again.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.is_active === false) {
+        setError("This license key is currently deactivated. Please contact support.");
         setLoading(false);
         return;
       }
@@ -68,14 +71,11 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
         email: data.user_email || `user_${data.id.substring(0, 5)}@creativeslab.ai`
       };
 
-const licenseObj: LicenseKeyRow = {
+      const licenseObj: LicenseKeyRow = {
         id: data.id,
         key: data.license_key,
         is_active: !!data.is_active
       };
-
-      // Save it here so the entire app can access it instantly!
-      localStorage.setItem("workspace_license_key", data.license_key);
 
       onVerified(userObj, licenseObj);
     } catch (err: any) {
