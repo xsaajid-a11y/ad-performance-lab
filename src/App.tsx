@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NICHE_TEMPLATES } from "./data";
 import { AdVariation, OptimizationResult, RecommendedAd, ViralInspiration } from "./types";
+import { AuthManager } from "./AuthManager"; // Double-check the path matches your filename
 import DashboardStats from "./components/DashboardStats";
 import AdVariationCard from "./components/AdVariationCard";
 import AICreativeRecommendations from "./components/AICreativeRecommendations";
@@ -88,9 +89,12 @@ function safeJsonParse<T>(value: string | null, fallback: T): T {
     return fallback;
   }
 }
-
 export default function App() {
   // 1. STATE INITIALIZATION
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(() => {
+    return !!localStorage.getItem("workspace_license_key");
+  });
+
   const [selectedNicheId, setSelectedNicheId] = useState<string>(NICHE_TEMPLATES[0].id);
   
   // Mutable drafts / reference examples (User can delete these if needed)
@@ -98,7 +102,6 @@ export default function App() {
     const saved = localStorage.getItem("advantage_variations");
     return safeJsonParse(saved, NICHE_TEMPLATES.flatMap(t => t.preloadedVariations));
   });
-
   // Supabase Database States
   const [loggedDatabase, setLoggedDatabase] = useState<AdVariation[]>([]);
   const [dbStatus, setDbStatus] = useState<"loading" | "connected" | "unconfigured" | "table_missing" | "error">("loading");
