@@ -117,11 +117,19 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
         share_count: video.share_count
       };
 
-      try {
-      const searchPayload = {
-        keyword: keyword.trim(),
-        license_key: licenseKey
+try {
+      const payload = {
+        action: "save_and_process",
+        license_key: licenseKey,
+        video_id: video.video_id,
+        username: video.username,
+        thumbnail_url: video.thumbnail_url,
+        video_url: video.video_url,
+        play_count: video.play_count,
+        like_count: video.like_count,
+        share_count: video.share_count
       };
+
       const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9", {
         method: "POST",
         headers: {
