@@ -15,7 +15,10 @@ import {
 } from "lucide-react";
 import { ReelsInspirationVideo } from "../types";
 
-export default function ReelsInspirationFinder() {
+interface ReelsInspirationFinderProps {
+  licenseKey: string;
+}
+export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationFinderProps) {{
   const [keyword, setKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -33,14 +36,18 @@ export default function ReelsInspirationFinder() {
     setErrorMsg(null);
 
     try {
-      // POST the raw keyword JSON string as requested: "the word the user typed"
-      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(keyword.trim())
-      });
+          const searchPayload = {
+            keyword: keyword.trim(),
+            license_key: licenseKey
+          };
+    
+          const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(searchPayload)
+          });
 
       if (!response.ok) {
         throw new Error(`Server responded with ${response.status}`);
@@ -100,6 +107,7 @@ export default function ReelsInspirationFinder() {
     try {
       const payload = {
         action: "save_and_process",
+        license_key: licenseKey,
         video_id: video.video_id,
         username: video.username,
         thumbnail_url: video.thumbnail_url,
@@ -109,6 +117,11 @@ export default function ReelsInspirationFinder() {
         share_count: video.share_count
       };
 
+      try {
+      const searchPayload = {
+        keyword: keyword.trim(),
+        license_key: licenseKey
+      };
       const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9", {
         method: "POST",
         headers: {
