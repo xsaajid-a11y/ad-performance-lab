@@ -48,7 +48,7 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
 
       if (queryError) {
         console.error("Database query error:", queryError);
-        setError("Invalid license key. Please verify your key and try again.");
+        setError("InvaDatabase responded, but returned nothing. Row check: Key looked for was "${licenseKeyInput.trim()}".`id license key. Please verify your key and try again.");
         setLoading(false);
         return;
       }
