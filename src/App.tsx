@@ -218,7 +218,21 @@ export default function App() {
   const activeViralInspirations = viralInspirations.filter(ins => ins.niche === activeNicheTemplate.name);
 
   const activeNicheResult = optimizationResults[selectedNicheId] || null;
+  const [activeStep, setActiveStep] = useState<number>(3);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
+  const memoizedResults = useMemo(() => {
+    if (!activeNicheResult) return [];
+    return Object.values(activeNicheResult).filter(Boolean);
+  }, [activeNicheResult]);
+
+  const handleStepChange = (step: number) => {
+    setActiveStep(step);
+  };
+
+  const handleProcessToggle = () => {
+    setIsProcessing((prev) => !prev);
+  };
   // 3. HANDLERS
   const handleDeleteVariation = (id: string) => {
     setVariations((prev) => prev.filter(v => v.id !== id));
