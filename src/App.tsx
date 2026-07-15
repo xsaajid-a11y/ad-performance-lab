@@ -457,7 +457,7 @@ export default function App() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold font-display text-zinc-100 tracking-tight">AdVantage AI</h1>
+              <h1 className="text-xl font-bold font-display text-zinc-100 tracking-tight">Creatives Lab</h1>
               <span className="text-[9px] font-mono bg-amber-950/30 text-amber-400 border border-amber-900/40 px-2.5 py-0.5 rounded-full font-bold">META PERFORMANCE LAB</span>
             </div>
           </div>
@@ -520,9 +520,7 @@ export default function App() {
               <div className="flex flex-col items-end">
                 <span className="font-semibold text-zinc-300 font-mono text-[10px]">{currentUser?.email}</span>
                 <div className="flex gap-2 text-[8px] font-bold text-zinc-500 uppercase tracking-wider font-mono mt-0.5">
-                  <span className="text-emerald-400">{(licenseInfo.tokens_left || 150000).toLocaleString()} credits</span>
-                  <span>•</span>
-                  <span className="text-blue-400">{licenseInfo.days_left || 30} days left</span>
+                  <span className="text-emerald-400">License Verified</span>
                 </div>
               </div>
               <button
