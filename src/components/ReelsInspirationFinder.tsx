@@ -15,10 +15,8 @@ import {
 } from "lucide-react";
 import { ReelsInspirationVideo } from "../types";
 
-interface ReelsInspirationFinderProps {
-  licenseKey: string;
-}
-export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationFinderProps) {
+
+export default function ReelsInspirationFinder() {
   const [keyword, setKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -28,6 +26,7 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Trigger n8n Search Webhook
+// Trigger n8n Search Webhook
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!keyword.trim()) return;
@@ -35,12 +34,15 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
     setIsLoading(true);
     setErrorMsg(null);
 
+    // Grab the key directly from localStorage so App.tsx doesn't have to pass it
+    const savedLicenseKey = localStorage.getItem("license_key") || "NO_KEY_FOUND";
+
     try {
       const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-License-Key": licenseKey
+          "X-License-Key": savedLicenseKey
         },
         body: JSON.stringify(keyword.trim())
       });
@@ -51,7 +53,6 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
 
       const data = await response.json();
       
-      // Robustly handle n8n response structure where actual videos are inside data[0].videos or data.videos
       let list: ReelsInspirationVideo[] = [];
       if (data) {
         if (Array.isArray(data)) {
