@@ -34,8 +34,8 @@ export default function ReelsInspirationFinder() {
     setIsLoading(true);
     setErrorMsg(null);
 
-    // Grab the key directly from localStorage so App.tsx doesn't have to pass it
-    const savedLicenseKey = localStorage.getItem("license_key") || "NO_KEY_FOUND";
+    // Look for this line inside handleSearch and handleTrainAI:
+const savedLicenseKey = localStorage.getItem("workspace_license_key") || "NO_KEY_FOUND";
 
     try {
       const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
