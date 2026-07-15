@@ -36,17 +36,14 @@ export default function ReelsInspirationFinder({ licenseKey }: ReelsInspirationF
     setErrorMsg(null);
 
     try {
-          const searchPayload = {
-            keyword: keyword.trim(),
-            license_key: licenseKey
-          };
-    
+          // Keep the body as a pure, raw string text so your n8n body node stays happy
           const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
             method: "POST",
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "X-License-Key": licenseKey // Passes the license key as a separate variable here!
             },
-            body: JSON.stringify(searchPayload)
+            body: JSON.stringify(keyword.trim())
           });
 
       if (!response.ok) {
@@ -129,15 +126,16 @@ try {
         like_count: video.like_count,
         share_count: video.share_count
       };
-
-      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
+          // Keep the body as a pure, raw string text so your n8n body node stays happy
+          const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-License-Key": licenseKey // Passes the license key as a separate variable here!
+            },
+            body: JSON.stringify(keyword.trim())
+          });
+    
       if (!response.ok) {
         throw new Error("Failed to post training action");
       }
