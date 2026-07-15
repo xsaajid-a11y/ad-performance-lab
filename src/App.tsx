@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NICHE_TEMPLATES } from "./data";
+import { AuthManager } from "./components/AuthManager";
 import { AdVariation, OptimizationResult, RecommendedAd, ViralInspiration } from "./types";
 import DashboardStats from "./components/DashboardStats";
 import AdVariationCard from "./components/AdVariationCard";
@@ -49,7 +50,7 @@ const SAMPLE_VIRAL_INSPIRATIONS: ViralInspiration[] = [
     niche: "B2B SaaS (AI Smart Calendar)",
     title: "Chaotic Slack DM Montage",
     hook: "This slack DM literally saved me from a mental breakdown...",
-    body: "My boss sent me 14 scheduling links an hour. I sent him one ChronosAI block that auto-clustered all meetings and defended my 3-hour focus window. He didn't even know what hit him.",
+    body: "My boss sent me 14 scheduling links in 1 hour. I sent him one ChronosAI block that auto-clustered all meetings and defended my 3-hour focus window. He didn't even know what hit him.",
     cta: "Try Free",
     description: "Green-screen zoom of chaotic Slack messages overlay, matching high-stress sound effect, transitioning to creator smiling holding an iced coffee.",
     views: "1.2M views",
@@ -90,6 +91,19 @@ function safeJsonParse<T>(value: string | null, fallback: T): T {
 }
 
 export default function App() {
+  // 0. AUTHENTICATION GATING STATE
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem("fa_authenticated") === "true";
+  });
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    const saved = localStorage.getItem("fa_user_obj");
+    return saved ? safeJsonParse(saved, null) : null;
+  });
+  const [licenseInfo, setLicenseInfo] = useState<any>(() => {
+    const saved = localStorage.getItem("fa_license_obj");
+    return saved ? safeJsonParse(saved, null) : null;
+  });
+
   // 1. STATE INITIALIZATION
   const [selectedNicheId, setSelectedNicheId] = useState<string>(NICHE_TEMPLATES[0].id);
   
@@ -417,11 +431,26 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isGenerating]);
 
+  if (!isAuthenticated) {
+    return (
+      <AuthManager 
+        onVerified={(user, license) => {
+          setIsAuthenticated(true);
+          setCurrentUser(user);
+          setLicenseInfo(license);
+          localStorage.setItem("fa_authenticated", "true");
+          localStorage.setItem("fa_user_obj", JSON.stringify(user));
+          localStorage.setItem("fa_license_obj", JSON.stringify(license));
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-zinc-100 flex flex-col font-sans">
       
       {/* 1. MINIMALIST TOP NAV BAR */}
-      <header id="app-header" className="border-b border-zinc-900 bg-black/90 backdrop-blur-md px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-6 sticky top-0 z-40">
+      <header id="app-header" className="border-b border-zinc-900 bg-black/90 backdrop-blur-md px-8 py-4 flex flex-col lg:flex-row justify-between items-center gap-4 sticky top-0 z-40">
         <div className="flex items-center space-x-3.5">
           <div className="w-10 h-10 rounded-xl bg-amber-950/20 border border-amber-900/40 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-amber-400" />
@@ -435,7 +464,7 @@ export default function App() {
         </div>
 
         {/* Global Tab Navigation */}
-        <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+        <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex-wrap justify-center">
           <button 
             onClick={() => setActiveTab("dashboard")}
             className={`px-5 py-2 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-2 cursor-pointer ${
@@ -482,6 +511,35 @@ export default function App() {
           >
             <Tv className="w-3.5 h-3.5" /> Inspiration Finder
           </button>
+        </div>
+
+        {/* User profile & License status */}
+        <div className="flex items-center gap-3">
+          {licenseInfo && (
+            <div className="flex items-center gap-3.5 bg-zinc-950 border border-zinc-900 rounded-xl px-3 py-1.5 text-xs">
+              <div className="flex flex-col items-end">
+                <span className="font-semibold text-zinc-300 font-mono text-[10px]">{currentUser?.email}</span>
+                <div className="flex gap-2 text-[8px] font-bold text-zinc-500 uppercase tracking-wider font-mono mt-0.5">
+                  <span className="text-emerald-400">{(licenseInfo.tokens_left || 150000).toLocaleString()} credits</span>
+                  <span>•</span>
+                  <span className="text-blue-400">{licenseInfo.days_left || 30} days left</span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsAuthenticated(false);
+                  setCurrentUser(null);
+                  setLicenseInfo(null);
+                  localStorage.removeItem("fa_authenticated");
+                  localStorage.removeItem("fa_user_obj");
+                  localStorage.removeItem("fa_license_obj");
+                }}
+                className="text-[9px] font-mono font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 px-2 py-1 rounded-lg border border-zinc-800 cursor-pointer transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
