@@ -39,7 +39,9 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
     setLoading(true);
     setError(null);
 
-    try {
+ try {
+      const trimmedKey = licenseKeyInput.trim();
+      
       const { data, error: queryError } = await supabase
         .from("license_keys")
         .select("*")
@@ -48,19 +50,14 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
 
       if (queryError) {
         console.error("Database query error:", queryError);
-        setError("InvaDatabase responded, but returned nothing. Row check: Key looked for was "${licenseKeyInput.trim()}".`id license key. Please verify your key and try again.");
+        setError(`Database connection error: ${queryError.message}`);
         setLoading(false);
         return;
       }
 
+      // Diagnostic check: This will tell us EXACTLY what the database found
       if (!data) {
-        setError("Invalid license key. Please verify your key and try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (data.is_active === false) {
-        setError("This license key is currently deactivated. Please contact support.");
+        setError(`Database connected, but found nothing. Looked for key: "${trimmedKey}"`);
         setLoading(false);
         return;
       }
