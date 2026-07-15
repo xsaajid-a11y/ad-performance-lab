@@ -30,50 +30,24 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const inputKey = licenseKeyInput.trim();
-    if (!inputKey) {
-      setError("Please enter your License Key to proceed.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // First, query via 'keys' column (as specified by user)
-      let keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?keys=eq.${encodeURIComponent(inputKey)}`;
-      let keyRes = await fetch(keyUrl, {
+try {
+      // 1. We query your newly updated 'license_key' column in Supabase
+      const keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?license_key=eq.${encodeURIComponent(inputKey)}`;
+      const keyRes = await fetch(keyUrl, {
         headers: {
           "apikey": SUPABASE_ANON_KEY,
           "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
         }
       });
 
-      let keysList: any[] = [];
-      let usedColumn = "keys";
-
+      // 2. If the database returns an error, we catch it here
       if (!keyRes.ok) {
-        // Fallback to 'key' column if 'keys' fails or doesn't exist
-        const fallbackUrl = `${SUPABASE_URL}/rest/v1/license_keys?key=eq.${encodeURIComponent(inputKey)}`;
-        const fallbackRes = await fetch(fallbackUrl, {
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        });
-
-        if (fallbackRes.ok) {
-          keysList = await fallbackRes.json();
-          usedColumn = "key";
-        } else {
-          throw new Error(`Database connection failed: Status ${keyRes.status}`);
-        }
-      } else {
-        keysList = await keyRes.json();
+        throw new Error(`Database connection failed: Status ${keyRes.status}`);
       }
 
+      const keysList = await keyRes.json();
+
+      // 3. Check if we found any matching license key
       if (!Array.isArray(keysList) || keysList.length === 0) {
         setError("Invalid license key. Please verify your key and try again.");
         setLoading(false);
@@ -82,34 +56,34 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
 
       const matchedLicense = keysList[0];
       
-      // If is_active is explicitly defined as false, block access
+      // 4. Check if the license key is active
       if (matchedLicense.is_active === false) {
         setError("This license key is currently deactivated. Please contact support.");
         setLoading(false);
         return;
       }
 
-      // Successful verification! Authenticate and store state
-      const finalKey = matchedLicense[usedColumn] || matchedLicense.key || matchedLicense.keys || inputKey;
+      // 5. Successful verification! We prepare the user data to log them in
+      const finalKey = matchedLicense.license_key || inputKey;
       const userObj = { 
         id: matchedLicense.user_id || finalKey, 
         email: matchedLicense.user_email || `licensed_${finalKey.substring(0, 4)}...`
       };
-      const licenseObj: LicenseKeyRow = {
+      const licenseObj = {
         id: matchedLicense.id || finalKey,
         key: finalKey,
         is_active: true
       };
 
+      // 6. Send the successful login data back to your main app
       onVerified(userObj, licenseObj);
+
     } catch (err: any) {
       console.error("Verification exception:", err);
       setError(`Authentication failed: ${err.message || "Please check your network connection and try again."}`);
     } finally {
       setLoading(false);
     }
-  };
-
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center font-sans px-4 py-12 relative overflow-hidden">
       {/* Ambient background glows */}
