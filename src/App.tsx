@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { NICHE_TEMPLATES } from "./data";
 import { AdVariation, OptimizationResult, RecommendedAd, ViralInspiration } from "./types";
 import { AuthManager } from "./AuthManager"; // Double-check the path matches your filename
@@ -233,7 +233,6 @@ export default function App() {
   const handleProcessToggle = () => {
     setIsProcessing((prev) => !prev);
   };
-  // 3. HANDLERS
   const handleDeleteVariation = (id: string) => {
     setVariations((prev) => prev.filter(v => v.id !== id));
   };
@@ -1094,89 +1093,6 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
                 )}
               </div>
 
-            </div>
-          )}
-
-          {/* TAB 2: AI OPTIMIZER WORKSPACE */}
-          {activeTab === "ai" && (
-            <div id="ai-chamber-workspace" className="space-y-8">
-              
-              {/* Loading Tech Terminal */}
-              {isGenerating && (
-                <div id="terminal-loader" className="bg-zinc-950 border border-zinc-900 rounded-3xl p-10 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[400px]">
-                  
-                  <div className="relative mb-6">
-                    <div className="w-14 h-14 rounded-full border-4 border-amber-400/10 border-t-amber-400 animate-spin flex items-center justify-center" />
-                    <Sparkles className="w-5 h-5 text-amber-400 absolute inset-0 m-auto animate-pulse" />
-                  </div>
-
-                  <h3 className="text-base font-bold font-display text-zinc-100 mb-2">Analyzing Meta Performance Curves</h3>
-                  <p className="text-xs text-zinc-400 max-w-md mx-auto mb-6 leading-relaxed">
-                    Gemini is processing your combined {combinedNicheVariations.length} reference and logged database variations, along with {activeViralInspirations.length} competitor references.
-                  </p>
-
-                  {/* Tech terminal line logs */}
-                  <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl max-w-lg w-full text-left font-mono text-[11px] text-zinc-400 space-y-2.5 shadow-inner">
-                    <div className="flex items-center gap-2">
-                      <span className="text-amber-400">❯</span>
-                      <span>DB_INIT: linked performance_vault count = {activeDatabaseVariations.length}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-amber-400">❯</span>
-                      <span>COMPETITOR_VAULT: viral_inspirations count = {activeViralInspirations.length}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-amber-400 font-semibold">
-                      <span className="text-amber-400 animate-pulse">●</span>
-                      <span>{loadingSteps[generationStep]}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Error boundary display */}
-              {errorMsg && !isGenerating && (
-                <div id="error-alert" className="bg-red-950/20 border border-red-900/40 text-red-200 p-6 rounded-2xl space-y-3 shadow-2xl">
-                  <h3 className="text-base font-bold font-display">Generation Interrupted</h3>
-                  <p className="text-xs leading-relaxed">{errorMsg}</p>
-                  <button 
-                    onClick={handleOptimize}
-                    className="text-xs font-mono font-bold text-red-200 bg-red-900/30 border border-red-800 px-4 py-2 rounded-lg hover:bg-red-900 transition-all cursor-pointer"
-                  >
-                    Retry Creative Synthesis
-                  </button>
-                </div>
-              )}
-
-              {/* No analysis empty state */}
-              {!activeNicheResult && !isGenerating && !errorMsg && (
-                <div id="ai-chamber-empty" className="bg-zinc-950 border border-zinc-900 rounded-3xl p-12 text-center max-w-xl mx-auto my-8 space-y-6 shadow-2xl">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-950/20 border border-amber-900/40 text-amber-400 flex items-center justify-center mx-auto">
-                    <Sparkles className="w-6 h-6 animate-pulse" />
-                  </div>
-                  <div className="space-y-2 max-w-md mx-auto">
-                    <h3 className="text-lg font-bold font-display text-zinc-100">AI Creative Chamber Ready</h3>
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      We will analyze your {combinedNicheVariations.length} total variations (reference examples and locked database entries) and {activeViralInspirations.length} competitor reels to engineer high-CTR ad concepts.
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleOptimize}
-                    className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-mono hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    Run Strategic Optimization
-                  </button>
-                </div>
-              )}
-
-              {/* AI Recommendations Output */}
-              {activeNicheResult && !isGenerating && !errorMsg && (
-                <AICreativeRecommendations 
-                  data={activeNicheResult}
-                  onSaveScript={handleSaveScript}
-                  savedScripts={savedScripts}
-                  nicheName={activeNicheTemplate.name}
-                />
-              )}
             </div>
           )}
 
