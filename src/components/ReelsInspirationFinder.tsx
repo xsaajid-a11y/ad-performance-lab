@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { ReelsInspirationVideo } from "../types";
 
-
 export default function ReelsInspirationFinder() {
   const [keyword, setKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +24,21 @@ export default function ReelsInspirationFinder() {
   const [trainingVideoIds, setTrainingVideoIds] = useState<Set<string>>(new Set());
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Helper to read current license key from localStorage
+  const getLicenseKey = (): string => {
+    try {
+      const saved = localStorage.getItem("cl_license_obj");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed?.key || "";
+      }
+    } catch (e) {
+      console.error("Error reading license key:", e);
+    }
+    return "";
+  };
+
   // Trigger n8n Search Webhook
-// Trigger n8n Search Webhook
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!keyword.trim()) return;
@@ -34,17 +46,20 @@ export default function ReelsInspirationFinder() {
     setIsLoading(true);
     setErrorMsg(null);
 
-    // Look for this line inside handleSearch and handleTrainAI:
-const savedLicenseKey = localStorage.getItem("workspace_license_key") || "NO_KEY_FOUND";
-
     try {
+      // POST the keyword and the license key as an object
+      const payload = {
+        keyword: keyword.trim(),
+        text: keyword.trim(),
+        license_key: getLicenseKey()
+      };
+
       const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-License-Key": savedLicenseKey
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(keyword.trim())
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -53,6 +68,7 @@ const savedLicenseKey = localStorage.getItem("workspace_license_key") || "NO_KEY
 
       const data = await response.json();
       
+      // Robustly handle n8n response structure where actual videos are inside data[0].videos or data.videos
       let list: ReelsInspirationVideo[] = [];
       if (data) {
         if (Array.isArray(data)) {
@@ -84,7 +100,7 @@ const savedLicenseKey = localStorage.getItem("workspace_license_key") || "NO_KEY
     }
   };
 
- // Trigger n8n Action Logic Webhook
+  // Trigger n8n Action Logic Webhook
   const handleTrainAI = async (video: ReelsInspirationVideo) => {
     const videoId = video.video_id || video.id || "unknown_id";
     
@@ -104,21 +120,20 @@ const savedLicenseKey = localStorage.getItem("workspace_license_key") || "NO_KEY
     try {
       const payload = {
         action: "save_and_process",
-        license_key: licenseKey,
         video_id: video.video_id,
         username: video.username,
         thumbnail_url: video.thumbnail_url,
         video_url: video.video_url,
         play_count: video.play_count,
         like_count: video.like_count,
-        share_count: video.share_count
+        share_count: video.share_count,
+        license_key: getLicenseKey()
       };
 
-    const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/8842771b-ff61-4693-9ef0-592bea82c0c9", {
+      const response = await fetch("https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-License-Key": licenseKey // Added here as a separate header variable!
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });
@@ -374,7 +389,7 @@ const savedLicenseKey = localStorage.getItem("workspace_license_key") || "NO_KEY
                               {isTraining ? (
                                 <>
                                   <CheckCircle2 className="w-3.5 h-3.5 text-zinc-500" />
-                                  <span>Submitted for Training</span>
+                                  <span>Training Initiated</span>
                                 </>
                               ) : (
                                 <>
