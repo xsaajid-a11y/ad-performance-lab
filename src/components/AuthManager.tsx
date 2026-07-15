@@ -8,8 +8,7 @@ import {
   Database, 
   Cpu, 
   Zap,
-  HelpCircle,
-  ArrowRight
+  HelpCircle
 } from "lucide-react";
 
 interface LicenseKeyRow {
@@ -30,9 +29,15 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-try {
+  // The fixed verification function
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
       // 1. We query your newly updated 'license_key' column in Supabase
-      const keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?license_key=eq.${encodeURIComponent(inputKey)}`;
+      const keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?license_key=eq.${encodeURIComponent(licenseKeyInput)}`;
       const keyRes = await fetch(keyUrl, {
         headers: {
           "apikey": SUPABASE_ANON_KEY,
@@ -64,7 +69,7 @@ try {
       }
 
       // 5. Successful verification! We prepare the user data to log them in
-      const finalKey = matchedLicense.license_key || inputKey;
+      const finalKey = matchedLicense.license_key || licenseKeyInput;
       const userObj = { 
         id: matchedLicense.user_id || finalKey, 
         email: matchedLicense.user_email || `licensed_${finalKey.substring(0, 4)}...`
@@ -84,6 +89,8 @@ try {
     } finally {
       setLoading(false);
     }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center font-sans px-4 py-12 relative overflow-hidden">
       {/* Ambient background glows */}
@@ -189,7 +196,7 @@ try {
         </div>
 
         {/* Bottom Help Text */}
-        <div className="flex flex-col items-center text-center space-y-1.5 text-[10px] text-zinc-650 mt-2">
+        <div className="flex flex-col items-center text-center space-y-1.5 text-[10px] text-zinc-600 mt-2">
           <div className="flex items-center gap-1.5 justify-center">
             <HelpCircle className="w-3.5 h-3.5 text-zinc-700" />
             <span>Need assistance or purchase information?</span>
