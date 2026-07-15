@@ -1177,7 +1177,7 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
           {/* TAB 4: REELS & TIKTOK INSPIRATION FINDER */}
           {activeTab === "inspiration" && (
             <div id="reels-inspiration-workspace" className="animate-fade-in">
-              <ReelsInspirationFinder licenseKey={licenseKey} />
+              <ReelsInspirationFinder />
             </div>
           )}
 
