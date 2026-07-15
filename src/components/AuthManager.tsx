@@ -43,7 +43,7 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
 
     try {
       // First, query via 'keys' column (as specified by user)
-      let keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?key=eq.${encodeURIComponent(inputKey)}`;
+      let keyUrl = `${SUPABASE_URL}/rest/v1/license_keys?keys=eq.${encodeURIComponent(inputKey)}`;
       let keyRes = await fetch(keyUrl, {
         headers: {
           "apikey": SUPABASE_ANON_KEY,
@@ -52,7 +52,7 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
       });
 
       let keysList: any[] = [];
-      let usedColumn = "key";
+      let usedColumn = "keys";
 
       if (!keyRes.ok) {
         // Fallback to 'key' column if 'keys' fails or doesn't exist
