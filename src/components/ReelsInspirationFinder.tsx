@@ -19,7 +19,7 @@ import { supabase } from "../lib/supabase";
 // EASY EXTENSION SYSTEM FOR NICHES & TABLES
 // To add new niches, simply append an object to this NICHE_OPTIONS array.
 // The system will automatically build the UI selector and query the 
-// matching table on Supabase dynamically!
+// matching table dynamically!
 // =========================================================================
 export interface NicheOption {
   id: string;
@@ -267,11 +267,11 @@ export default function ReelsInspirationFinder() {
         <div className="max-w-xl w-full space-y-6 relative z-10">
           <div className="space-y-2">
             <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-bold flex items-center justify-center gap-1.5">
-              <Database className="w-3.5 h-3.5" /> Verified Database Integration
+              <Database className="w-3.5 h-3.5" /> Secure Database Vault
             </span>
             <h3 className="text-xl font-bold text-zinc-100 font-display tracking-tight">Access Viral Content Vault</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Select your marketing niche category below. The system fetches exactly 10 high-performance ads from the connected Supabase table and iterates to the next batch on each click.
+              Select your marketing niche category below. The system fetches high-performance creative assets and iterates to the next top-converting batch on each click.
             </p>
           </div>
 
@@ -289,7 +289,7 @@ export default function ReelsInspirationFinder() {
                 >
                   {NICHE_OPTIONS.map((niche) => (
                     <option key={niche.id} value={niche.id} className="bg-zinc-950 text-zinc-100">
-                      {niche.name} (Table: {niche.tableName})
+                      {niche.name}
                     </option>
                   ))}
                 </select>
@@ -297,12 +297,6 @@ export default function ReelsInspirationFinder() {
                   <ChevronRight className="w-4 h-4 rotate-90" />
                 </div>
               </div>
-            </div>
-
-            {/* Pagination / Offset Metadata Indicator */}
-            <div className="flex items-center justify-between bg-zinc-900/50 border border-zinc-850 px-4 py-2.5 rounded-xl text-[11px] font-mono text-zinc-400">
-              <span>Next starting offset:</span>
-              <span className="text-amber-400 font-bold">Row #{currentOffsetVal}</span>
             </div>
 
             <button
@@ -313,12 +307,12 @@ export default function ReelsInspirationFinder() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
-                  <span>Loading Row #{currentOffsetVal} - #{currentOffsetVal + 9}...</span>
+                  <span>Fetching Inspirations...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 text-zinc-950" />
-                  <span>Fetch Inspirations #{currentOffsetVal + 1} - #{currentOffsetVal + 10}</span>
+                  <span>Fetch Inspirations</span>
                 </>
               )}
             </button>
@@ -326,7 +320,7 @@ export default function ReelsInspirationFinder() {
 
           {errorMsg && (
             <p className="text-xs text-red-400 font-mono bg-red-950/15 border border-red-900/30 py-2.5 px-4 rounded-xl">
-              {errorMsg}
+              Failed to retrieve creative assets. Please check your credentials or database configuration.
             </p>
           )}
         </div>
@@ -345,7 +339,7 @@ export default function ReelsInspirationFinder() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-zinc-100 font-display">Viral Creative Assets ({currentNiche?.name})</h3>
-                  <p className="text-[11px] text-zinc-500">Showing rows {Math.max(0, currentOffsetVal - 10) + 1} to {Math.max(0, currentOffsetVal - 10) + videos.length} from {currentNiche?.tableName}</p>
+                  <p className="text-[11px] text-zinc-500">Showing top performing concepts for {currentNiche?.name}</p>
                 </div>
               </div>
               <button 
@@ -361,8 +355,8 @@ export default function ReelsInspirationFinder() {
               {videos.length === 0 ? (
                 <div className="py-16 text-center space-y-3">
                   <Tv className="w-12 h-12 text-zinc-800 mx-auto" />
-                  <p className="text-sm text-zinc-400">No active assets could be retrieved from Supabase table &ldquo;{currentNiche?.tableName}&rdquo;</p>
-                  <p className="text-xs text-zinc-500">Please make sure the table has active records and is configured correctly.</p>
+                  <p className="text-sm text-zinc-400">No active assets could be retrieved for &ldquo;{currentNiche?.name}&rdquo;</p>
+                  <p className="text-xs text-zinc-500">Please make sure the library contains active records.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
