@@ -182,7 +182,7 @@ export const AuthManager: React.FC<AuthManagerProps> = ({ onVerified }) => {
             <div className="p-2 bg-zinc-950 border border-zinc-900 rounded-lg flex flex-col items-center justify-center text-center">
               <Cpu className="w-4 h-4 text-zinc-600 mb-1" />
               <span className="text-[9px] font-bold text-zinc-400 block">Model Engine</span>
-              <span className="text-[8px] text-zinc-650 block mt-0.5">Gemini 2.5</span>
+              <span className="text-[8px] text-zinc-650 block mt-0.5">Analytical AI</span>
             </div>
             <div className="p-2 bg-zinc-950 border border-zinc-900 rounded-lg flex flex-col items-center justify-center text-center">
               <Zap className="w-4 h-4 text-zinc-600 mb-1" />
