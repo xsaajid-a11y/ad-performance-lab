@@ -566,7 +566,7 @@ export default function AddVariationModal({ onClose, onLogToDatabase, activeNich
               <div className="space-y-2 max-w-md mx-auto">
                 <h4 className="text-xl font-bold font-display text-zinc-100">Ad Creative Successfully Logged</h4>
                 <p className="text-xs text-zinc-400 font-mono">
-                  Pushed to Supabase Database Cluster under table <span className="text-amber-400">"ad_variations"</span>.
+                  Pushed to persistent Cloud Database Cluster.
                 </p>
               </div>
 
@@ -578,7 +578,7 @@ export default function AddVariationModal({ onClose, onLogToDatabase, activeNich
                   This ad variation is now locked and stored in persistent database servers. Rather than cluttering your daily draft boards, it is integrated as high-priority training background context.
                 </p>
                 <p className="text-zinc-400 font-mono text-[11px]">
-                  ❯ Next time you click <span className="text-amber-400">"Optimize Creatives"</span>, Gemini will analyze this past entry alongside competitors to write even stronger scripts.
+                  ❯ Next time you click <span className="text-amber-400">"Optimize Creatives"</span>, the system will analyze this past entry alongside competitors to write even stronger scripts.
                 </p>
               </div>
 
