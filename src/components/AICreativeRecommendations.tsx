@@ -92,7 +92,7 @@ export default function AICreativeRecommendations({ data, onSaveScript, savedScr
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(161, 161, 170); // zinc-400
-    const descriptionText = "Custom high-CTR scripts engineered by Gemini using performance-audited historical reference concepts, designed to maximize hook conversion rates and reduce Meta Ad learning friction.";
+    const descriptionText = "Custom high-CTR scripts engineered by Analytical AI using performance-audited historical reference concepts, designed to maximize hook conversion rates and reduce Meta Ad learning friction.";
     const descLines = doc.splitTextToSize(descriptionText, contentWidth);
     doc.text(descLines, margin, y);
     y += (descLines.length * 4) + 6;
@@ -104,7 +104,7 @@ export default function AICreativeRecommendations({ data, onSaveScript, savedScr
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(244, 244, 245); // zinc-100
-    doc.text("Gemini Strategic Performance Diagnostics", margin + 5, y + 6.5);
+    doc.text("Strategic Performance Diagnostics", margin + 5, y + 6.5);
 
     // separator line
     doc.setDrawColor(39, 39, 42); // zinc-800
@@ -270,7 +270,7 @@ export default function AICreativeRecommendations({ data, onSaveScript, savedScr
         
         <div className="flex items-center space-x-2.5 mb-8">
           <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
-          <h2 className="text-xl font-bold font-display text-zinc-100">Gemini Strategic Performance Diagnostics</h2>
+          <h2 className="text-xl font-bold font-display text-zinc-100">AI Strategic Performance Diagnostics</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
