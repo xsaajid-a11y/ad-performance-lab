@@ -113,7 +113,7 @@ export default function App() {
     return safeJsonParse(saved, NICHE_TEMPLATES.flatMap(t => t.preloadedVariations));
   });
 
-  // Supabase Database States
+  // Persistent Database States
   const [loggedDatabase, setLoggedDatabase] = useState<AdVariation[]>([]);
   const [dbStatus, setDbStatus] = useState<"loading" | "connected" | "unconfigured" | "table_missing" | "error">("loading");
   const [dbMessage, setDbMessage] = useState<string>("");
@@ -129,22 +129,22 @@ export default function App() {
       if (result.status === "success") {
         setLoggedDatabase(result.data);
         setDbStatus("connected");
-        setDbMessage("LIVE: Synced to your active Supabase database!");
+        setDbMessage("LIVE: Synced to your active Cloud Database!");
       } else if (result.status === "table_missing") {
         setDbStatus("table_missing");
-        setDbMessage("Table 'ad_variations' does not exist in your Supabase database yet.");
+        setDbMessage("Required database tables do not exist in your Cloud Database yet.");
         // Fallback to local
         const saved = localStorage.getItem("advantage_logged_database");
         setLoggedDatabase(safeJsonParse(saved, []));
       } else {
         setDbStatus("unconfigured");
-        setDbMessage("Supabase credentials not configured. Local fallback enabled.");
+        setDbMessage("Database credentials not configured. Local sandbox mode enabled.");
         // Fallback to local
         const saved = localStorage.getItem("advantage_logged_database");
         setLoggedDatabase(safeJsonParse(saved, []));
       }
     } catch (err: any) {
-      console.error("Failed to load Supabase variations:", err);
+      console.error("Failed to load Cloud variations:", err);
       setDbStatus("error");
       setDbMessage("Could not connect to database proxy server.");
       const saved = localStorage.getItem("advantage_logged_database");
@@ -272,7 +272,7 @@ export default function App() {
           }
         }
       } catch (err) {
-        console.error("Error writing to Supabase, saving to local storage fallback:", err);
+        console.error("Error writing to cloud database, saving to local storage fallback:", err);
       }
     }
     
@@ -413,7 +413,7 @@ export default function App() {
   const loadingSteps = [
     "Auditing your logged performance databases...",
     "Querying local viral competitor references...",
-    "Extracting conversion triggers with Gemini 3.5-Flash...",
+    "Extracting conversion triggers with Enterprise AI Engine...",
     "Bypassing Meta ad learning phase constraints...",
     "Drafting customized, high-CTR hook variations...",
     "Formulating action-oriented, friction-free CTAs..."
@@ -582,7 +582,7 @@ export default function App() {
               <Lightbulb className="w-4 h-4 text-amber-400" /> Strategic Directions
             </h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Optionally specify target audiences, promotional constraints, or voice tone to guide Gemini's recommendation process.
+              Optionally specify target audiences, promotional constraints, or voice tone to guide the AI's recommendation process.
             </p>
 
             <textarea
@@ -605,12 +605,12 @@ export default function App() {
             </button>
           </div>
 
-          {/* INTERACTIVE SUPABASE CONNECTION KIT & SCHEMA GUIDE */}
+          {/* INTERACTIVE CONNECTION KIT & SCHEMA GUIDE */}
           <div className="bg-zinc-950 border border-zinc-900 rounded-3xl p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
               <div className="flex items-center gap-2">
                 <DatabaseZap className="w-4.5 h-4.5 text-amber-400" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-100 font-mono">Supabase Sync Status</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-100 font-mono">Database Sync Status</h3>
               </div>
               <div className="flex items-center">
                 {dbStatus === "connected" && (
@@ -643,8 +643,8 @@ export default function App() {
             
             <p className="text-[11px] text-zinc-400 leading-relaxed">
               {dbStatus === "connected" 
-                ? "Your live input boxes are connected directly to your persistent production Supabase database cluster!" 
-                : "Configure your production database by creating the ad_variations table in your Supabase project."}
+                ? "Your live input boxes are connected directly to your persistent production cloud database cluster!" 
+                : "Configure your production database by executing the creation script on your cloud database cluster."}
             </p>
 
             <div className="space-y-4">
@@ -991,7 +991,7 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
                   <div>
                     <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2 font-display">
                       <Database className="text-amber-400 w-5 h-5" />
-                      <span>Supabase Cloud Vault</span>
+                      <span>Persistent Cloud Vault</span>
                     </h3>
                     <p className="text-xs text-zinc-400 mt-1">
                       Persistent training entries stored in your active cloud relational database
@@ -1016,7 +1016,7 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
                 {dbStatus === "loading" && (
                   <div className="text-center py-12 text-zinc-500 font-mono text-xs space-y-3">
                     <div className="w-6 h-6 rounded-full border-2 border-amber-400/20 border-t-amber-400 animate-spin mx-auto" />
-                    <p>Contacting Supabase API cluster...</p>
+                    <p>Contacting database cluster...</p>
                   </div>
                 )}
 
@@ -1026,7 +1026,7 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
                     <div className="space-y-1">
                       <h4 className="text-xs font-bold text-zinc-100 uppercase tracking-wide font-mono">Table Schema Not Activated</h4>
                       <p className="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
-                        To activate this cloud training set, you must run the SQL creation script inside your Supabase SQL Editor. Copy the script from the sidebar and execute it.
+                        To activate this cloud training set, you must execute the SQL creation script inside your SQL editor. Copy the script from the sidebar and execute it.
                       </p>
                     </div>
                   </div>
@@ -1149,7 +1149,7 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
 
                   <h3 className="text-base font-bold font-display text-zinc-100 mb-2">Analyzing Meta Performance Curves</h3>
                   <p className="text-xs text-zinc-400 max-w-md mx-auto mb-6 leading-relaxed">
-                    Gemini is processing your combined {combinedNicheVariations.length} reference and logged database variations, along with {activeViralInspirations.length} competitor references.
+                    The engine is processing your combined {combinedNicheVariations.length} reference and logged database variations, along with {activeViralInspirations.length} competitor references.
                   </p>
 
                   {/* Tech terminal line logs */}
@@ -1352,7 +1352,7 @@ ALTER TABLE ad_variations ADD COLUMN IF NOT EXISTS ad_type text;`;
       {/* FOOTER METADATA - CLEAN & METADATA-FREE */}
       <footer className="border-t border-zinc-900 bg-zinc-950/80 p-6 text-center text-xs text-zinc-500 mt-12">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>AdVantage Performance Analytics & Copywriting Engine. Stored securely on simulated Supabase Database clusters.</p>
+          <p>AdVantage Performance Analytics & Copywriting Engine. Stored securely on secure cloud servers.</p>
         </div>
       </footer>
 
