@@ -359,6 +359,47 @@ Using the learning data and viral concepts, diagnose underlying problems (such a
   }
 });
 
+// Proxy endpoint to n8n Webhook for active script generation
+app.post("/api/generate-script", async (req, res) => {
+  try {
+    const { webhookUrl, payload } = req.body;
+    const targetUrl = webhookUrl || "https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a";
+    
+    console.log("Routing script-generation webhook payload to n8n:", targetUrl);
+    
+    const n8nResponse = await fetch(targetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!n8nResponse.ok) {
+      const errorText = await n8nResponse.text();
+      console.error(`n8n webhook responded with status ${n8nResponse.status}:`, errorText);
+      return res.status(n8nResponse.status).json({
+        error: `n8n Webhook error: ${errorText || n8nResponse.statusText}`
+      });
+    }
+    
+    // Parse response. n8n might return JSON or raw string
+    const contentType = n8nResponse.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const jsonRes = await n8nResponse.json();
+      return res.json({ status: "success", data: jsonRes });
+    } else {
+      const textRes = await n8nResponse.text();
+      return res.json({ status: "success", data: textRes });
+    }
+  } catch (err: any) {
+    console.error("n8n proxy handler failed:", err);
+    return res.status(500).json({ 
+      error: `Proxy request to n8n failed: ${err.message || err}` 
+    });
+  }
+});
+
 // Configure Vite integration or build static server
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
