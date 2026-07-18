@@ -363,7 +363,7 @@ Using the learning data and viral concepts, diagnose underlying problems (such a
 app.post("/api/generate-script", async (req, res) => {
   try {
     const { webhookUrl, payload } = req.body;
-    const targetUrl = webhookUrl || "https://elvazagroup.app.n8n.cloud/webhook-test/b3f5aed7-9583-48e6-ba74-3af4dc35696a";
+    const targetUrl = webhookUrl || "https://elvazagroup.app.n8n.cloud/webhook-test/generate-ad-script";
     
     console.log("Routing script-generation webhook payload to n8n:", targetUrl);
     
