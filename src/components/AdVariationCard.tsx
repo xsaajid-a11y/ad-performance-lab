@@ -8,7 +8,7 @@ interface AdVariationCardProps {
   badge?: React.ReactNode;
 }
 
-export default function AdVariationCard({ variation, onDelete, badge }: AdVariationCardProps) {
+const AdVariationCard: React.FC<AdVariationCardProps> = ({ variation, onDelete, badge }) => {
   const isSpendValid = variation.spend >= 75;
   const isDaysValid = variation.days >= 14;
   const isVerified = isSpendValid && isDaysValid;
@@ -149,4 +149,6 @@ export default function AdVariationCard({ variation, onDelete, badge }: AdVariat
       </div>
     </div>
   );
-}
+};
+
+export default AdVariationCard;
